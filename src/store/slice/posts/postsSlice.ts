@@ -1,5 +1,6 @@
 import {createSlice, createAsyncThunk, createEntityAdapter, createReducer} from '@reduxjs/toolkit';
 import axios from 'axios';
+import {RootState} from "../../store";
 
 interface Post {
     userId: number,
@@ -8,11 +9,12 @@ interface Post {
     body: string
 }
 
-const postsAdapter = createEntityAdapter<Post[]>();
+const postsAdapter = createEntityAdapter<Post>();
 const initialState = postsAdapter.getInitialState();
-export const postsSelectors = postsAdapter.getSelectors()
+export const selectAllPostsAdapter =  postsAdapter.getSelectors<RootState>(state => state.posts)
+
 export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
-    const response = await axios.get<{data: Post[]}>('https://jsonplaceholder.typicode.com/posts')
+    const response = await axios.get<{data: Post}>('https://jsonplaceholder.typicode.com/posts')
 
     return response.data
 })
@@ -28,10 +30,11 @@ const postsSlice = createSlice({
     extraReducers: builder => {
         builder
             .addCase(fetchPosts.fulfilled, (state, action) => {
-                postsAdapter.setAll(state, action.payload);
+                postsAdapter.addMany(state, action.payload);
             })
     }
 })
 
 const reducer = postsSlice.reducer;
 export default reducer;
+
