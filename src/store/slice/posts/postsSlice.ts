@@ -1,4 +1,11 @@
-import {createSlice, createAsyncThunk, createEntityAdapter, createReducer} from '@reduxjs/toolkit';
+import {
+    createSlice,
+    createAsyncThunk,
+    createEntityAdapter,
+    createReducer,
+    Dictionary,
+    EntityId
+} from '@reduxjs/toolkit';
 import axios from 'axios';
 import {RootState} from "../../store";
 
@@ -9,9 +16,27 @@ interface Post {
     body: string
 }
 
+interface ActionError {
+    error: {
+        message: string
+    }
+}
+
+interface PostsState {
+    status: 'idle' | 'loading' | 'succeeded' | 'failed',
+    error: string | null,
+    entities: Dictionary<Post>,
+    ids: EntityId[]
+}
+
 const postsAdapter = createEntityAdapter<Post>();
-const initialState = postsAdapter.getInitialState();
-export const selectAllPostsAdapter =  postsAdapter.getSelectors<RootState>(state => state.posts)
+const initialState: PostsState = {
+    status: 'idle',
+    error: null,
+    ...postsAdapter.getInitialState()
+}
+
+export const selectAllPostsAdapter = postsAdapter.getSelectors<RootState>(state => state.posts)
 
 export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
     const response = await axios.get<{data: Post}>('https://jsonplaceholder.typicode.com/posts')
@@ -31,6 +56,13 @@ const postsSlice = createSlice({
         builder
             .addCase(fetchPosts.fulfilled, (state, action) => {
                 postsAdapter.addMany(state, action.payload);
+            })
+            .addCase(fetchPosts.pending, (state, action) => {
+                state.status = 'loading'
+            })
+            .addCase(fetchPosts.rejected, (state, action) => {
+                state.status = 'failed'
+                state.error = action.error.message
             })
     }
 })
