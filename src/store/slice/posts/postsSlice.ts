@@ -7,7 +7,7 @@ import {
     EntityId
 } from '@reduxjs/toolkit';
 import axios from 'axios';
-import {RootState} from "../../store";
+import {RootState} from '../../store';
 
 interface Post {
     userId: number,
@@ -38,8 +38,8 @@ const initialState: PostsState = {
 
 export const selectAllPostsAdapter = postsAdapter.getSelectors<RootState>(state => state.posts)
 
-export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
-    const response = await axios.get<{data: Post}>('https://jsonplaceholder.typicode.com/posts')
+export const fetchPosts = createAsyncThunk<Post[], null, {rejectValue: ActionError}>('posts/fetchPosts', async () => {
+    const response = await axios.get('https://jsonplaceholder.typicode.com/posts')
 
     return response.data
 })
@@ -62,7 +62,7 @@ const postsSlice = createSlice({
             })
             .addCase(fetchPosts.rejected, (state, action) => {
                 state.status = 'failed'
-                state.error = action.error.message
+                state.error = action.error.message || null
             })
     }
 })
