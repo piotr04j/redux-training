@@ -1,0 +1,11 @@
+.modal {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: red;
+    height: 300px;
+    width: 300px;
+    font-size: 32px;
+    color: #fff;
+}
