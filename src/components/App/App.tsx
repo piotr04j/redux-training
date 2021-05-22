@@ -4,6 +4,7 @@ import './App.css';
 import {fetchPosts, selectAllPostsAdapter} from '../../store/slice/posts/postsSlice';
 import {useAppDispatch} from '../../store/hook/hook';
 import { useSelector } from 'react-redux';
+import Modal from "../Modal/Modal";
 
 function App() {
     const dispatch = useAppDispatch()
@@ -26,6 +27,7 @@ function App() {
                 })
             }
         </ul>
+        <Modal />
     </div>
   );
 }
