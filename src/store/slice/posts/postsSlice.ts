@@ -16,12 +16,6 @@ interface Post {
     body: string
 }
 
-interface ActionError {
-    error: {
-        message: string
-    }
-}
-
 interface PostsState {
     status: 'idle' | 'loading' | 'succeeded' | 'failed',
     error: string | null,
@@ -38,7 +32,7 @@ const initialState: PostsState = {
 
 export const selectAllPostsAdapter = postsAdapter.getSelectors<RootState>(state => state.posts)
 
-export const fetchPosts = createAsyncThunk<Post[], null, {rejectValue: ActionError}>('posts/fetchPosts', async () => {
+export const fetchPosts = createAsyncThunk<Post[]>('posts/fetchPosts', async () => {
     const response = await axios.get('https://jsonplaceholder.typicode.com/posts')
 
     return response.data
@@ -55,6 +49,7 @@ const postsSlice = createSlice({
     extraReducers: builder => {
         builder
             .addCase(fetchPosts.fulfilled, (state, action) => {
+                state.status = 'succeeded'
                 postsAdapter.addMany(state, action.payload);
             })
             .addCase(fetchPosts.pending, (state, action) => {
@@ -62,7 +57,7 @@ const postsSlice = createSlice({
             })
             .addCase(fetchPosts.rejected, (state, action) => {
                 state.status = 'failed'
-                state.error = action.error.message || null
+                state.error = action.error.message as string
             })
     }
 })
